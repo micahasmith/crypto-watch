@@ -1,0 +1,5 @@
+logs
+node_modules
+trade_history_logs
+.DS_Store
+./data

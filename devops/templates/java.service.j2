@@ -1,0 +1,32 @@
+#
+# https://gist.github.com/vipmax/d8f1e148e52a7a189814cf7851e5bbb0
+#
+
+
+[Unit]
+Description = {{ service_name }}
+After       = network.target
+
+[Service]
+WorkingDirectory=/home/{{user_name}}/{{service_name}}/
+# make sure the shell script is executable (chmod +x $1)
+# and it begins with a shebang (#!/bin/bash)
+ExecStart   = /usr/bin/java -jar /home/{{user_name}}/{{service_name}}/{{ jar_local_filename}} {{ jar_args }}
+
+# In my example script I start a node server,
+# So tell the serive how to kill it / reload.
+ExecStop    = kill -INT $MAINPID
+ExecReload  = kill -TERM $MAINPID
+
+# In case if it gets stopped, restart it immediately
+Restart     = always
+
+# i dont know, man. look it up motherfucker
+Type        = simple
+
+User=heurai
+
+[Install]
+# multi-user.target corresponds to run level 3
+# roughtly meaning wanted by system start
+WantedBy    = multi-user.target

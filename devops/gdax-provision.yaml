@@ -1,0 +1,54 @@
+- name: gdax role provision
+  hosts: gdax
+  sudo: yes
+  pre_tasks:
+    - name: Update cache
+      apt:
+        update_cache: yes
+  tasks:
+    # - name: install R
+    #   apt:
+    #     name: r-base-core
+    #     state: present
+
+    # https://www.digitalocean.com/community/tutorials/how-to-set-up-r-on-ubuntu-14-04
+    # - name: install R package - Rserve
+    #   shell: "sudo su - -c \"R -e \\\"install.packages('Rserve', repos = 'http://cran.rstudio.com/')\\\"\"\nBy installin"
+    # - name: install R package - dplyr, ggplot2, tidyr, readr, purr, tibble
+    #   shell: "sudo su - -c \"R -e \\\"install.packages('tidyverse', repos = 'http://cran.rstudio.com/')\\\"\"\nBy installin"
+    # - name: install R package - RcppRoll
+    #   shell: "sudo su - -c \"R -e \\\"install.packages('RcppRoll', repos = 'http://cran.rstudio.com/')\\\"\"\nBy installin"
+
+    - name: Make sure we have a 'wheel' group for sudoers
+      group:
+        name: wheel
+        state: present
+
+    - name: Allow 'wheel' group to have passwordless sudo
+      lineinfile:
+        dest: /etc/sudoers
+        state: present
+        regexp: '^%wheel'
+        line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
+
+    - name: create heurai user
+      user: name=heurai
+            groups=wheel
+            append=yes
+            state=present
+            createhome=yes
+      become: yes
+      become_method: "sudo"
+
+    - name: Set up authorized keys for the heurai user
+      authorized_key: user=heurai key="{{item}}"
+      with_file:
+        - ~/.ssh/id_rsa.pub
+
+    - name: enable ufw for ssh only
+      shell: "ufw allow OpenSSH && sudo ufw --force enable"
+
+  roles:
+    - { role: 'geerlingguy.java', tags: 'java' }
+    - DavidWittman.redis

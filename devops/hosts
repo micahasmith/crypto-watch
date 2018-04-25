@@ -1,0 +1,6 @@
+[gdax]
+# add your images here like
+#my-vm   ansible_ssh_host=5.5.5.5      cloud=digitalocean
+
+[gdax:vars]
+ansible_user=root
